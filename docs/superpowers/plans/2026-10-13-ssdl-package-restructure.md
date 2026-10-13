@@ -192,7 +192,7 @@ def test_file_hash_matches_known_digest(tmp_path):
     target.write_bytes(b"%PDF-1.4 test")
     expected = hashlib.sha256(b"%PDF-1.4 test").hexdigest()
     assert file_hash(target) == expected
-    assert os.path.getsize(target) == 14
+    assert os.path.getsize(target) == 13
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
