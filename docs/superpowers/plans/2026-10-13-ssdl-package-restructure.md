@@ -46,7 +46,7 @@
 - Consumes: nothing (first task).
 - Produces: installed distribution `semantic-scholar-pdf-downloader` version `3.0.0`; module `ssdl` exposing `__version__: str`. Editable install supplies `requests`, `openpyxl`, `pytest` for all later tasks.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `tests/test_package.py`:
 
@@ -64,12 +64,12 @@ def test_version_is_pinned():
     assert ssdl.__version__ == "3.0.0"
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `python -m pip install pytest` (only if pytest is missing), then `python -m pytest tests/test_package.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'ssdl'`
 
-- [ ] **Step 3: Create `pyproject.toml`, `ssdl/__init__.py`, `.gitignore`**
+- [x] **Step 3: Create `pyproject.toml`, `ssdl/__init__.py`, `.gitignore`**
 
 `pyproject.toml` exactly as given (no `[project.scripts]` yet — that arrives with `cli.py` in Task 6):
 
@@ -121,17 +121,17 @@ dist/
 .pytest_cache/
 ```
 
-- [ ] **Step 4: Install the package in editable mode**
+- [x] **Step 4: Install the package in editable mode**
 
 Run: `python -m pip install -e ".[dev]"`
 Expected: ends with `Successfully installed ... semantic-scholar-pdf-downloader-3.0.0 ...` (plus `requests`, `openpyxl`, `pytest` if they were missing)
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [x] **Step 5: Run the test to verify it passes**
 
 Run: `python -m pytest tests/test_package.py -v`
 Expected: PASS, 2 passed
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add pyproject.toml .gitignore ssdl/__init__.py tests/test_package.py
@@ -155,7 +155,7 @@ git commit -m "feat: add packaging skeleton for ssdl package"
 
 If Python cannot find the new module, re-run `python -m pip install -e ".[dev]"`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `tests/test_download.py`:
 
@@ -195,12 +195,12 @@ def test_file_hash_matches_known_digest(tmp_path):
     assert os.path.getsize(target) == 13
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_download.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'ssdl.download'`
 
-- [ ] **Step 3: Create `ssdl/download.py` with the two functions moved verbatim**
+- [x] **Step 3: Create `ssdl/download.py` with the two functions moved verbatim**
 
 Copy `safe_filename` (from `downloader.py` lines 28–43) and `file_hash` (lines 46–60) into `ssdl/download.py` unchanged, keeping their docstrings. Top of file:
 
@@ -211,12 +211,12 @@ import re
 
 No behavior edits — the tests above pin the current behavior.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_download.py -v`
 Expected: PASS, 6 passed
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add ssdl/download.py tests/test_download.py
@@ -241,7 +241,7 @@ git commit -m "feat: move safe_filename and file_hash into ssdl.download"
   - Module-level `import time` (tests monkeypatch `time.sleep` through it).
   - **Change:** the `openAccessPdf` key is removed from the query `params` dict (the field stays in `FIELDS`).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `tests/test_search.py` — fake transport first, then the tests:
 
@@ -373,21 +373,21 @@ def test_create_session_sets_headers():
     assert session.headers["Accept"] == "application/json"
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_search.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'ssdl.search'`
 
-- [ ] **Step 3: Create `ssdl/search.py` with `API_URL`, `FIELDS`, `create_session`, `search_papers`**
+- [x] **Step 3: Create `ssdl/search.py` with `API_URL`, `FIELDS`, `create_session`, `search_papers`**
 
 Move `API_URL`, `FIELDS` (lines 14–25), `create_session` (lines 63–80), and `search_papers` (lines 83–215) from `downloader.py` verbatim, then delete the `openAccessPdf` entry from the `params` dict in `search_papers` together with the comment block above it. Keep `import time` at module level.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_search.py -v`
 Expected: PASS, 9 passed
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add ssdl/search.py tests/test_search.py
@@ -406,7 +406,7 @@ git commit -m "feat: move search logic into ssdl.search, drop dead query param"
 - Consumes: package `ssdl` from Task 1; `openpyxl` from Task 1's install.
 - Produces: `create_excel(excel_path, records: list) -> None` — writes the workbook at `excel_path`, overwriting any existing file. Each record is a `dict` with keys `number, title, authors, year, venue, doi, paper_url, pdf_url, sha256, filename` (defined by Task 6's `main()` loop).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `tests/test_excel.py`:
 
@@ -487,21 +487,21 @@ def test_overwrites_previous_workbook(tmp_path):
     assert ws.max_row == 1
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_excel.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'ssdl.excel'`
 
-- [ ] **Step 3: Create `ssdl/excel.py` with `create_excel` moved verbatim**
+- [x] **Step 3: Create `ssdl/excel.py` with `create_excel` moved verbatim**
 
 Move `create_excel` (lines 371–463) from `downloader.py` unchanged — headers, freeze panes, hyperlink loop, column widths, `workbook.save(excel_path)`.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_excel.py -v`
 Expected: PASS, 5 passed
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add ssdl/excel.py tests/test_excel.py
@@ -520,7 +520,7 @@ git commit -m "feat: move Excel metadata writer into ssdl.excel"
 - Consumes: `ssdl.download.file_hash`, `ssdl.download.safe_filename` already in place (Task 2); `requests` from Task 1.
 - Produces: `download_pdf(url, destination, session, max_retries=4) -> tuple` returning `(success: bool, message: str)`. On success `destination` holds the exact response bytes and no `.part` file remains; on failure nothing is left on disk. Uses `.part` + atomic rename, validates content-type or `%PDF` magic, honors `Retry-After` on 429/5xx.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/test_download.py` (imports at top become `hashlib`, `os`, `pytest`, `requests`, plus `from ssdl.download import download_pdf, file_hash, safe_filename`):
 
@@ -641,21 +641,21 @@ def test_cleans_up_part_file_on_request_error(tmp_path):
     assert list(tmp_path.glob("*.part")) == []
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_download.py -v`
 Expected: 6 old tests PASS, 6 new tests FAIL with `ImportError: cannot import name 'download_pdf'`
 
-- [ ] **Step 3: Append `download_pdf` to `ssdl/download.py` moved verbatim**
+- [x] **Step 3: Append `download_pdf` to `ssdl/download.py` moved verbatim**
 
 Move `download_pdf` (lines 218–368) from `downloader.py` unchanged. Add `import time` and `import requests` at the top of `ssdl/download.py`.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/test_download.py -v`
 Expected: PASS, 12 passed
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add ssdl/download.py tests/test_download.py
@@ -679,7 +679,7 @@ git commit -m "feat: move download_pdf with .part and validation logic into ssdl
   - `search_papers`, `download_pdf`, and `create_session` are imported **by name** into `ssdl.cli` so tests can monkeypatch `ssdl.cli.search_papers` etc.
   - Record dict keys: `number, title, authors, year, venue, doi, paper_url, pdf_url, sha256, filename` (consumed by `create_excel`, Task 4).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `tests/test_cli.py`:
 
@@ -819,12 +819,12 @@ def test_absolute_output_is_used_as_is(tmp_path, monkeypatch):
     assert (out / "papers.xlsx").is_file()
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `python -m pytest tests/test_cli.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'ssdl.cli'`
 
-- [ ] **Step 3: Create `ssdl/cli.py`**
+- [x] **Step 3: Create `ssdl/cli.py`**
 
 - Move `main()` (lines 466–1089) and its `argparse` setup verbatim, with exactly three edits:
   1. Signature becomes `def main(argv=None):` and the parse call becomes `args = parser.parse_args(argv)`.
@@ -832,7 +832,7 @@ Expected: FAIL with `ModuleNotFoundError: No module named 'ssdl.cli'`
   3. Add `if __name__ == "__main__": main()` at the bottom.
 - Imports at top of file: `from ssdl.download import download_pdf, file_hash, safe_filename`, `from ssdl.search import create_session, search_papers`, `from ssdl.excel import create_excel`, plus `argparse`, `time`, `pathlib.Path` as used. `requests` stays imported (it is caught by name in `main()`).
 
-- [ ] **Step 4: Declare the console script and reinstall**
+- [x] **Step 4: Declare the console script and reinstall**
 
 Add to `pyproject.toml`, directly under the `[project.optional-dependencies]` block:
 
@@ -844,12 +844,12 @@ ssdl = "ssdl.cli:main"
 Run: `python -m pip install -e ".[dev]"` then `ssdl --help`
 Expected: prints usage starting with `usage: ssdl [-h] --query QUERY` (if `ssdl` is not recognized, reopen the shell and retry; verify with `python -c "from ssdl.cli import main; main(['--help'])"`)
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/ -v`
 Expected: PASS, all tests across Tasks 1–6 (40 total — the plan originally predicted 45; Task 2's six tests live inside Task 5's `tests/test_download.py`, so they were counted twice)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add ssdl/cli.py pyproject.toml tests/test_cli.py
@@ -868,7 +868,7 @@ git commit -m "feat: add ssdl CLI entry point with anchored default output"
 - Consumes: the `ssdl` command installed in Task 6.
 - Produces: a README whose every command has been executed (scaled down where noted), and a repo with exactly one entry point.
 
-- [ ] **Step 1: Rewrite `README.md`**
+- [x] **Step 1: Rewrite `README.md`**
 
 Section by section, keeping the document's tone and tables:
 
@@ -880,16 +880,16 @@ Section by section, keeping the document's tone and tables:
 - **Troubleshooting** — replace `ModuleNotFoundError` rows with "re-run `python -m pip install -e .`"; drop `'python' is not recognized` → keep as-is; add a `ssdl is not recognized` row ("reopen the terminal after installing, or check the Python Scripts directory is on PATH").
 - **Add a Development section** — `python -m pip install -e ".[dev]"`, `python -m pytest`, no network needed for tests.
 
-- [ ] **Step 2: Delete the original script**
+- [x] **Step 2: Delete the original script**
 
 Run: `git rm downloader.py`
 
-- [ ] **Step 3: Confirm no stale references remain**
+- [x] **Step 3: Confirm no stale references remain**
 
 Run: `grep -rn "downloader.py\|research-downloader" README.md docs/ || echo CLEAN`
 Expected: `CLEAN` (the two spec files under `docs/superpowers/specs/` are historical records of this migration — if grep hits them, leave those hits and confirm `README.md` itself is clean)
 
-- [ ] **Step 4: Run the scaled-down smoke commands from the README**
+- [x] **Step 4: Run the scaled-down smoke commands from the README**
 
 Run each, from the repo root:
 
@@ -906,12 +906,12 @@ ssdl `
 
 Expected: `--help` prints usage; each real run creates `.smoke-verify\papers.xlsx` and 0–2 `*.pdf` files whose names start `01 - `. A rate-limit wait is acceptable evidence that retry handling works; a specific download count is **not** required. Then clean up: `Remove-Item -Recurse .smoke-verify`.
 
-- [ ] **Step 5: Run the full test suite one last time**
+- [x] **Step 5: Run the full test suite one last time**
 
 Run: `python -m pytest tests/ -v`
 Expected: PASS, 40 passed
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add README.md
