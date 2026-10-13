@@ -847,7 +847,7 @@ Expected: prints usage starting with `usage: ssdl [-h] --query QUERY` (if `ssdl`
 - [ ] **Step 5: Run the tests to verify they pass**
 
 Run: `python -m pytest tests/ -v`
-Expected: PASS, all tests across Tasks 1–6 (45 total)
+Expected: PASS, all tests across Tasks 1–6 (40 total — the plan originally predicted 45; Task 2's six tests live inside Task 5's `tests/test_download.py`, so they were counted twice)
 
 - [ ] **Step 6: Commit**
 
@@ -909,7 +909,7 @@ Expected: `--help` prints usage; each real run creates `.smoke-verify\papers.xls
 - [ ] **Step 5: Run the full test suite one last time**
 
 Run: `python -m pytest tests/ -v`
-Expected: PASS, 45 passed
+Expected: PASS, 40 passed
 
 - [ ] **Step 6: Commit**
 
