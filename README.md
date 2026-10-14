@@ -66,13 +66,13 @@ semantic-scholar-pdf-downloader/
 │   ├── cli.py                                     ← argument parsing + main loop
 │   ├── search.py                                  ← Semantic Scholar API + rate-limit handling
 │   ├── download.py                                ← PDF download, validation, hashing
-│   └── excel.py                                   ← papers.xlsx metadata writer
-├── tests/                                         ← pytest suite, no network required
-│   ├── test_package.py
-│   ├── test_search.py
-│   ├── test_download.py
-│   ├── test_excel.py
-│   └── test_cli.py
+│   ├── excel.py                                   ← papers.xlsx metadata writer
+│   └── tests/                                     ← pytest suite, no network required
+│       ├── test_package.py
+│       ├── test_search.py
+│       ├── test_download.py
+│       ├── test_excel.py
+│       └── test_cli.py
 └── papers/                                        ← created automatically
     ├── 01 - Machine Learning in Healthcare [...].pdf
     ├── 02 - Deep Learning in Healthcare [...].pdf
@@ -329,7 +329,7 @@ ssdl \
 
 ```bash
 python -m pip install -e ".[dev]"     # install with test dependencies
-python -m pytest                      # run the suite (40 tests)
+python -m pytest                      # run the suite (41 tests)
 ```
 
 The tests never touch the network — the API and the PDF host are replaced with scripted fakes, so they run in under a second.
