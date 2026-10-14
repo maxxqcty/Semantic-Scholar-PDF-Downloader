@@ -143,6 +143,46 @@ def test_default_output_anchors_to_project_root(tmp_path, monkeypatch):
     assert list(fake_pkg.iterdir()) == []
 
 
+def test_second_page_is_fetched_when_target_exceeds_first_page(tmp_path, monkeypatch):
+    """Crossing a page boundary must advance the offset and keep going."""
+
+    def paper(pid, title, with_pdf):
+        entry = {"paperId": pid, "title": title}
+        if with_pdf:
+            entry["openAccessPdf"] = {"url": f"https://example.org/{pid}.pdf"}
+        return entry
+
+    page_one = {"data": [paper(f"000000000000{i:04d}", f"Page One {i}", False)
+                         for i in range(100)],
+                "total": 101, "next": 100}
+    page_two = {"data": [paper("999999999999xxxx", "Page Two", True)],
+                "total": 101, "next": None}
+
+    monkeypatch.setattr(cli, "create_session", lambda: object())
+    calls = []
+
+    def fake_search(query, offset, limit, session):
+        # Requesting the same offset twice is the pagination
+        # failure mode that would otherwise spin forever.
+        if offset in calls:
+            raise RuntimeError(f"pagination stuck at offset {offset}")
+        calls.append(offset)
+        return page_one if offset == 0 else page_two
+
+    monkeypatch.setattr(cli, "search_papers", fake_search)
+    monkeypatch.setattr(
+        cli, "download_pdf",
+        lambda url, destination, session, max_retries=4: _fake_download(url, destination),
+    )
+
+    out = tmp_path / "out"
+    cli.main(["--query", "q", "--max-results", "1", "--output", str(out),
+              "--delay", "0", "--search-delay", "0"])
+
+    assert calls == [0, 100]
+    assert [p.name for p in out.glob("*.pdf")] == ["01 - Page Two [999999999999].pdf"]
+
+
 def test_absolute_output_is_used_as_is(tmp_path, monkeypatch):
     _stub(monkeypatch, {"data": [], "total": 0, "next": None})
     out = tmp_path / "elsewhere"
