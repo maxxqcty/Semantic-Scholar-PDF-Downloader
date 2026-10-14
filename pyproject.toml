@@ -21,5 +21,8 @@ dev = [
 [project.scripts]
 ssdl = "ssdl.cli:main"
 
+[tool.pytest.ini_options]
+testpaths = ["ssdl/tests"]
+
 [tool.setuptools]
 packages = ["ssdl"]
