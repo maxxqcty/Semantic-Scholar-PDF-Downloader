@@ -6,7 +6,9 @@ A Python command-line tool for searching [Semantic Scholar](https://www.semantic
 ![License](https://img.shields.io/badge/license-Responsible--Use-lightgrey)
 ![Status](https://img.shields.io/badge/status-stable-brightgreen)
 
-The downloader searches Semantic Scholar, checks whether a paper has an open-access PDF URL, downloads the PDF, verifies that the response is actually a PDF, detects duplicate files, and records metadata for successful downloads in an Excel spreadsheet.
+The tool searches Semantic Scholar, checks whether a paper has an open-access PDF URL, downloads the PDF, verifies that the response is actually a PDF, detects duplicate files, and records metadata for successful downloads in an Excel spreadsheet.
+
+Install it once from this folder and it becomes a command, `ssdl`, available from any terminal.
 
 ---
 
@@ -23,6 +25,7 @@ The downloader searches Semantic Scholar, checks whether a paper has an open-acc
 - [How It Handles Edge Cases](#-how-it-handles-edge-cases)
 - [Examples](#-examples)
 - [Recommended Workflow](#-recommended-workflow)
+- [Development](#-development)
 - [Troubleshooting](#-troubleshooting)
 - [Responsible Use](#-responsible-use)
 
@@ -39,7 +42,7 @@ The downloader searches Semantic Scholar, checks whether a paper has an open-acc
 | **Resilience** | Handles HTTP `429`, retries `500/502/503/504` with exponential backoff, respects `Retry-After` |
 | **Metadata** | Logs title, authors, year, venue, DOI, URLs, hash, and filename to an Excel file after every success |
 | **Naming** | Sequential numbering + optional custom prefix + paper ID in every filename |
-| **Portability** | Runs from any working directory; output defaults next to the script |
+| **Installable** | `pip install -e .` once, then run `ssdl` from any directory |
 
 ---
 
@@ -47,26 +50,39 @@ The downloader searches Semantic Scholar, checks whether a paper has an open-acc
 
 - **Python** 3.9 or newer
 - Internet access
-- Packages: `requests`, `openpyxl`
+- Dependencies (`requests`, `openpyxl`) are installed automatically by pip
 
 ---
 
 ## 📁 Project Structure
 
 ```text
-research-downloader/
-├── downloader.py
+semantic-scholar-pdf-downloader/
+├── pyproject.toml                                 ← package metadata + the `ssdl` command
 ├── README.md
-└── papers/                                          ← created automatically
+├── .gitignore
+├── ssdl/
+│   ├── __init__.py
+│   ├── cli.py                                     ← argument parsing + main loop
+│   ├── search.py                                  ← Semantic Scholar API + rate-limit handling
+│   ├── download.py                                ← PDF download, validation, hashing
+│   └── excel.py                                   ← papers.xlsx metadata writer
+├── tests/                                         ← pytest suite, no network required
+│   ├── test_package.py
+│   ├── test_search.py
+│   ├── test_download.py
+│   ├── test_excel.py
+│   └── test_cli.py
+└── papers/                                        ← created automatically
     ├── 01 - Machine Learning in Healthcare [...].pdf
     ├── 02 - Deep Learning in Healthcare [...].pdf
     ├── 03 - Artificial Intelligence in Medicine [...].pdf
     └── papers.xlsx
 ```
 
-> You don't need to create the `papers/` directory manually — it's generated on first run.
+> You don't need to create the `papers/` directory manually — it's generated on first run, and it is git-ignored.
 
-> **Implementation note:** `downloader.py` must resolve its default output path with `Path(__file__).resolve().parent`, so that the "run from any directory" behavior described below matches reality.
+> **Implementation note:** `ssdl/cli.py` must resolve its default output path with `Path(__file__).resolve().parent.parent` — the parent of the `ssdl/` package directory — so the default output lands in the project folder rather than inside the package itself.
 
 ---
 
@@ -85,33 +101,38 @@ python --version
 
 If `python` doesn't work, try `python3 --version`.
 
-### 2. Install dependencies
+### 2. Install the tool
+
+From this folder:
 
 ```bash
-pip install requests openpyxl
+python -m pip install -e .
 ```
 
-If `pip` isn't recognized:
+That single command installs the `ssdl` command **and** its dependencies (`requests`, `openpyxl`).
+
+If you also want to run the test suite:
 
 ```bash
-python -m pip install requests openpyxl      # Windows
-python3 -m pip install requests openpyxl      # Linux / macOS
+python -m pip install -e ".[dev]"
 ```
+
+> On Windows with **pyenv-win**, run `pyenv rehash` after installing (or open a new terminal) so the shell picks up the new `ssdl` command.
 
 ---
 
 ## 🚀 Basic Usage
 
 ```bash
-python downloader.py --query "machine learning healthcare"
+ssdl --query "machine learning healthcare"
 ```
 
-By default this attempts to download **50 successful, unique PDFs** into `papers/` (created next to `downloader.py`).
+By default this attempts to download **50 successful, unique PDFs** into `papers/` (created next to `pyproject.toml`).
 
 Want fewer papers?
 
 ```bash
-python downloader.py --query "machine learning healthcare" --max-results 20
+ssdl --query "machine learning healthcare" --max-results 20
 ```
 
 > `--max-results` counts **successful, unique** downloads — not search results examined. The tool keeps paging through results until it hits that target or runs out of results.
@@ -133,31 +154,31 @@ python downloader.py --query "machine learning healthcare" --max-results 20
 See full help anytime:
 
 ```bash
-python downloader.py --help
+ssdl --help
 ```
 
 ---
 
 ## 📂 Output Directory
 
-**Default** — relative to `downloader.py`, regardless of your current terminal directory:
+**Default** — the project folder (next to `pyproject.toml`), regardless of your current terminal directory:
 
 ```bash
-python downloader.py --query "machine learning healthcare"
-# → D:\ResearchTool\papers\
+ssdl --query "machine learning healthcare"
+# → <this folder>/papers/
 ```
 
 **Custom (relative or absolute)**:
 
 ```bash
-# Relative
-python downloader.py --query "machine learning healthcare" --output "research"
+# Relative (resolved against the project folder)
+ssdl --query "machine learning healthcare" --output "research"
 
 # Absolute (Windows)
-python downloader.py --query "machine learning healthcare" --output "D:\Research\Papers"
+ssdl --query "machine learning healthcare" --output "D:\Research\Papers"
 
 # Absolute (Linux/macOS)
-python3 downloader.py --query "machine learning healthcare" --output "/home/user/research/papers"
+ssdl --query "machine learning healthcare" --output "/home/user/research/papers"
 ```
 
 ---
@@ -236,36 +257,36 @@ Results are pulled in pages (default size `100`, adjustable via <code>--page-siz
 
 ```bash
 # Basic search — 50 PDFs into ./papers
-python downloader.py --query "machine learning healthcare"
+ssdl --query "machine learning healthcare"
 
 # Grab just 10
-python downloader.py --query "machine learning healthcare" --max-results 10
+ssdl --query "machine learning healthcare" --max-results 10
 
 # Custom output directory
-python downloader.py --query "machine learning healthcare" \
+ssdl --query "machine learning healthcare" \
     --max-results 50 --output "D:\Research\Healthcare"
 
 # Custom filename prefix
-python downloader.py --query "machine learning healthcare" \
+ssdl --query "machine learning healthcare" \
     --max-results 50 --prefix "Healthcare ML"
 
 # Directory + prefix combined
-python downloader.py --query "machine learning healthcare" \
+ssdl --query "machine learning healthcare" \
     --max-results 100 --output "D:\Research\Healthcare" --prefix "Healthcare ML"
 
 # Slow things down if you're hitting 429s
-python downloader.py --query "machine learning healthcare" \
+ssdl --query "machine learning healthcare" \
     --max-results 50 --delay 5 --search-delay 10
 
 # Large literature search
-python downloader.py --query "deep learning medical imaging" \
+ssdl --query "deep learning medical imaging" \
     --max-results 200 --output "D:\Research\Medical Imaging" --prefix "Medical Imaging"
 ```
 
 **PowerShell** (multi-line with backtick):
 
 ```powershell
-python downloader.py `
+ssdl `
     --query "machine learning healthcare" `
     --max-results 50 `
     --output "D:\Research\Papers" `
@@ -275,7 +296,7 @@ python downloader.py `
 **Linux/macOS** (multi-line with backslash):
 
 ```bash
-python3 downloader.py \
+ssdl \
     --query "machine learning healthcare" \
     --max-results 50 \
     --output "/home/user/research"
@@ -287,11 +308,11 @@ python3 downloader.py \
 
 1. **Test the query** with a small batch to check relevance:
    ```bash
-   python downloader.py --query "machine learning healthcare" --max-results 5
+   ssdl --query "machine learning healthcare" --max-results 5
    ```
 2. **Scale up** once results look right:
    ```bash
-   python downloader.py --query "machine learning healthcare" --max-results 50
+   ssdl --query "machine learning healthcare" --max-results 50
    ```
 3. **Organize** with a descriptive output directory:
    ```bash
@@ -304,13 +325,25 @@ python3 downloader.py \
 
 ---
 
+## 🧪 Development
+
+```bash
+python -m pip install -e ".[dev]"     # install with test dependencies
+python -m pytest                      # run the suite (40 tests)
+```
+
+The tests never touch the network — the API and the PDF host are replaced with scripted fakes, so they run in under a second.
+
+---
+
 ## 🧩 Troubleshooting
 
 | Problem | Fix |
 |---|---|
-| `'python' is not recognized` | Try `python3 --version`, or reinstall Python with "Add to PATH" checked |
-| `pip` not recognized | Use `python -m pip install requests openpyxl` |
-| `ModuleNotFoundError: requests` / `openpyxl` | `python -m pip install requests openpyxl` |
+| `'ssdl' is not recognized` | Open a new terminal after installing; with **pyenv-win**, run `pyenv rehash` first |
+| `python` is not recognized | Reinstall Python with "Add to PATH" checked, or try `python3` |
+| `ModuleNotFoundError: ssdl` | Re-run `python -m pip install -e .` from this folder |
+| `ModuleNotFoundError: requests` / `openpyxl` | Re-run `python -m pip install -e .` (dependencies install with the package) |
 | Frequent `HTTP 429` | Increase delays: `--delay 5 --search-delay 10` |
 | `Search failed permanently` | Check internet connection, firewall, and Semantic Scholar status; test with `--max-results 1` |
 | Fewer files than requested | Normal — some results lack PDFs, fail, or are duplicates; the tool stops once search results are exhausted |
